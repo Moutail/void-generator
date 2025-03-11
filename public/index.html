@@ -2286,6 +2286,7 @@
 
     // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
     // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
+// Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
 function startTargetSearch() {
     const targetText = document.getElementById('targetText').value.trim();
     const alphabet = document.getElementById('alphabet').value;
@@ -2336,8 +2337,8 @@ function startTargetSearch() {
         return (score / targetLength) - (lengthPenalty / targetLength);
     }
     
-    // Initialisation de la population - Déplacée ici pour être définie avant d'être utilisée
-    function initializePopulation() {
+    // Initialisation de la population
+    function initPopulation() {
         population = [];
         for (let i = 0; i < populationSize; i++) {
             const length = Math.min(targetText.length, Math.max(1, Math.floor(Math.random() * targetText.length) + 1));
@@ -2445,8 +2446,8 @@ function startTargetSearch() {
         return { individual: best, fitness: bestScore };
     }
     
-    // Initialiser la population - Appel maintenant que toutes les fonctions sont définies
-    initializePopulation();
+    // Initialiser la population - CORRECTION ICI: Appel direct de la fonction locale
+    initPopulation();
     
     // Fonction principale d'évolution
     const evolve = () => {
@@ -2510,12 +2511,12 @@ function startTargetSearch() {
             return;
         }
         
-        // Continuer l'évolution
-        setTimeout(evolve, 10);
+        // Continuer l'évolution avec requestAnimationFrame pour plus de réactivité
+        requestAnimationFrame(evolve);
     };
     
     // Démarrer l'évolution
-    evolve();
+    requestAnimationFrame(evolve);
 }
 
     // Fonction pour arrêter la recherche ciblée
