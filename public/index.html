@@ -2286,8 +2286,8 @@
 
 // Récupérer les valeurs des entrées et les convertir en minuscules
  function startTargetSearch() {
-    const targetText = document.getElementById('targetText').value.trim().toLowerCase();
-    const alphabet = document.getElementById('alphabet').value.toLowerCase();
+    const targetText = document.getElementById('targetText').value.trim();
+    const alphabet = document.getElementById('alphabet').value;
     const maxLength = parseInt(document.getElementById('maxLength').value);
     
     if (!targetText) {
@@ -2512,6 +2512,10 @@
         // Continuer l'évolution avec requestAnimationFrame pour plus de réactivité
         requestAnimationFrame(evolve);
     };
+    
+    // Démarrer l'évolution
+    requestAnimationFrame(evolve);
+}
     
     // Démarrer l'évolution
     requestAnimationFrame(evolve);
