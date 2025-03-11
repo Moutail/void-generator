@@ -1,0 +1,3011 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur Combinatoire de Texte - VOID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="description" content="Générateur Combinatoire de Texte - Une application développée par Choussi Cherif qui explore les possibilités infinies des combinaisons de texte.">
+    <meta name="author" content="Choussi Cherif">
+    <meta name="keywords" content="générateur, combinatoire, texte, algorithme, VOID">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #1e293b;
+            --secondary-color: #334155;
+            --accent-color: #0ea5e9;
+            --accent-hover: #0284c7;
+            --text-color: #f8fafc;
+            --background-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --button-radius: 6px;
+            --card-radius: 8px;
+            --transition-speed: 0.3s;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        .processing-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--button-radius);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .processing-indicator.active {
+            display: flex;
+        }
+        
+        .processing-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s infinite linear;
+            margin-right: 0.5rem;
+        }
+        
+        .processing-text {
+            font-size: 0.9rem;
+        }
+
+        header {
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.1), transparent 70%);
+            z-index: 0;
+        }
+
+        .logo-container {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.75rem;
+        }
+        
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: 8px;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+        }
+        
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .author {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .quote-container {
+            margin: 2rem auto;
+            max-width: 800px;
+            padding: 0 1.5rem;
+        }
+        
+        .quote {
+            position: relative;
+            font-style: italic;
+            line-height: 1.8;
+            padding: 1.75rem;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            border-radius: var(--card-radius);
+            background: var(--card-bg);
+            border-left: 4px solid var(--accent-color);
+            box-shadow: var(--shadow-md);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .quote:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            flex: 1;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            background: var(--primary-color);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .tab {
+            padding: 1rem 1.25rem;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            min-width: 130px;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab.active {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.75rem;
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            margin-bottom: 1.75rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-group {
+            margin-bottom: 1.75rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid var(--secondary-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            border-radius: var(--button-radius);
+            font-size: 1rem;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
+        
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--button-radius);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        button:hover {
+            background-color: var(--accent-hover);
+            box-shadow: var(--shadow-md);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        button i {
+            margin-right: 0.4rem;
+        }
+        
+        .stop-btn {
+            background-color: var(--error-color);
+        }
+        
+        .stop-btn:hover {
+            background-color: #dc2626;
+        }
+        
+        .progress-container {
+            margin-top: 1.75rem;
+            display: none;
+        }
+        
+        .progress-container p {
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            height: 24px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: var(--button-radius);
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), #38bdf8);
+            width: 0%;
+            transition: width 0.5s;
+            position: relative;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                45deg, 
+                rgba(255, 255, 255, 0.2) 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0.2) 75%, 
+                transparent 75%, 
+                transparent
+            );
+            background-size: 20px 20px;
+            animation: progressAnimation 1s linear infinite;
+        }
+
+        @keyframes progressAnimation {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 20px 0;
+            }
+        }
+        
+        #targetProgressText {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        #currentCombination {
+            font-family: 'Montserrat', monospace;
+            font-size: 1.75rem;
+            letter-spacing: 2px;
+            margin: 1.75rem 0;
+            text-align: center;
+            min-height: 48px;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: var(--button-radius);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: background-color var(--transition-speed);
+        }
+        
+        .char {
+            display: inline-block;
+            margin: 0 2px;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        #currentCombination:hover .char {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+        
+        .space {
+            color: var(--accent-color);
+            opacity: 0.8;
+        }
+        
+        .result-container {
+            margin-top: 1.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.25rem;
+            border-radius: var(--card-radius);
+            max-height: 350px;
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) rgba(0, 0, 0, 0.2);
+        }
+
+        .result-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .result-container::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        .result-container h3 {
+            margin-bottom: 1.25rem;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-container h3::before {
+            content: '\f02d';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            margin-right: 0.75rem;
+            color: var(--accent-color);
+        }
+        
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.9rem;
+            margin-top: 1.25rem;
+        }
+        
+        .word-item, .phrase-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.9rem;
+            border-radius: var(--button-radius);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .word-item:hover, .phrase-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .phrase-item {
+            white-space: normal;
+            margin-bottom: 0.9rem;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+        
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin: 1.75rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.25rem;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--card-radius);
+            flex: 1;
+            min-width: 120px;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            background: linear-gradient(to top, var(--primary-color), var(--secondary-color));
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.1), transparent 70%);
+            z-index: 0;
+        }
+        
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer-logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: 3px;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .footer-links a i {
+            font-size: 1.1rem;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: var(--button-radius);
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity var(--transition-speed), transform var(--transition-speed);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+            pointer-events: none;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--secondary-color) transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        .success-message {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--success-color);
+            padding: 1.25rem;
+            border-radius: var(--button-radius);
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .info-message {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--info-color);
+            padding: 1.25rem;
+            border-radius: var(--button-radius);
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .progress-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: var(--button-radius);
+        }
+
+        .progress-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .progress-info span::before {
+            content: '\f054';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.7rem;
+            color: var(--accent-color);
+        }
+        
+        .found-animation {
+            animation: pulse-success 1.2s;
+        }
+        
+        @keyframes pulse-success {
+            0% { background-color: transparent; }
+            30% { background-color: rgba(16, 185, 129, 0.3); }
+            100% { background-color: transparent; }
+        }
+        
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .notification-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .notification-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .notification-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .notification {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: var(--card-radius);
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 0;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: flex-start;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border-left: 4px solid var(--accent-color);
+            pointer-events: auto;
+            max-width: 100%;
+        }
+        
+        .notification-show {
+            transform: translateX(0);
+        }
+        
+        .notification-hide {
+            transform: translateX(120%);
+        }
+        
+        .notification-icon {
+            margin-right: 0.9rem;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .notification-content {
+            flex: 1;
+            word-break: break-word;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.75rem;
+            opacity: 0.7;
+            transition: opacity var(--transition-speed), transform var(--transition-speed);
+            flex-shrink: 0;
+        }
+        
+        .notification-close:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .notification-error {
+            border-left-color: var(--error-color);
+        }
+        
+        .notification-success {
+            border-left-color: var(--success-color);
+        }
+
+        .notification-info {
+            border-left-color: var(--info-color);
+        }
+
+        .notification-warning {
+            border-left-color: var(--warning-color);
+        }
+
+        /* Bouton pour accéder au mode "Gérer les phrases" */
+        .manage-phrases-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 100;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .manage-phrases-btn:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        /* Modal pour la gestion des phrases */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-speed), visibility var(--transition-speed);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--primary-color);
+            border-radius: var(--card-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-20px);
+            transition: transform var(--transition-speed);
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .phrase-management {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--button-radius);
+            padding: 1rem;
+        }
+
+        .phrase-item-manage {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--button-radius);
+            transition: background-color var(--transition-speed);
+        }
+
+        .phrase-item-manage:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .phrase-text {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .phrase-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .edit-btn {
+            background-color: var(--info-color);
+        }
+
+        .edit-btn:hover {
+            background-color: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background-color: var(--error-color);
+        }
+
+        .delete-btn:hover {
+            background-color: #b91c1c;
+            transform: scale(1.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .phrase-filter {
+            margin-bottom: 1rem;
+        }
+
+        .clear-notifications {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            background-color: var(--secondary-color);
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+        /* Indicateur de chargement */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Classes pour l'édition de phrases */
+        .edit-form {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: var(--button-radius);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .edit-form.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Compteurs de notifications */
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--error-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Badge utilisé pour les statistiques ou informations */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .badge-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .badge-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .badge-error {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        /* Amélioration des boutons pour le mode mobile */
+        .floating-action-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .floating-action-menu .menu-trigger {
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .floating-action-menu .menu-trigger:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        .floating-action-menu .menu-items {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: scale(0);
+            transform-origin: bottom left;
+            transition: transform var(--transition-speed);
+            opacity: 0;
+        }
+
+        .floating-action-menu.active .menu-items {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .floating-action-menu .menu-item {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: transform var(--transition-speed), background-color var(--transition-speed);
+        }
+
+        .floating-action-menu .menu-item:hover {
+            transform: scale(1.1);
+            background-color: var(--secondary-color);
+        }
+
+        .fixed-height-output {
+            height: 100px; /* Hauteur fixe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: var(--button-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Animation plus douce pour les transitions */
+        #randomOutput .char {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* Responsive pour les appareils mobiles */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                border-radius: var(--button-radius);
+            }
+            
+            .tab {
+                border-radius: 0;
+                margin: 0;
+                padding: 0.75rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .stat-item {
+                width: 100%;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+            
+            #currentCombination {
+                font-size: 1.4rem;
+                letter-spacing: 1px;
+            }
+            
+            .word-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            
+            .result-container {
+                max-height: 300px;
+            }
+            
+            .result-container h3 {
+                font-size: 1.1rem;
+            }
+            
+            /* Amélioration des notifications sur mobile */
+            .notification-container {
+                max-width: calc(100% - 20px);
+                right: 10px;
+                bottom: 10px;
+                max-height: 60vh;
+            }
+            
+            .notification {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Limiter le nombre de notifications visibles */
+            .notification:nth-child(n+4) {
+                display: none;
+            }
+            
+            /* Badge qui indique le nombre de notifications masquées */
+            .notification-container::after {
+                content: attr(data-hidden);
+                position: absolute;
+                bottom: -30px;
+                right: 0;
+                background-color: var(--secondary-color);
+                color: var(--text-color);
+                padding: 0.25rem 0.5rem;
+                border-radius: var(--button-radius);
+                font-size: 0.8rem;
+                opacity: 0.9;
+                pointer-events: none;
+                display: block;
+            }
+            
+            /* Adaptation du modal en mode mobile */
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+                padding: 1rem;
+            }
+            
+            .modal-title {
+                font-size: 1.2rem;
+            }
+            
+            .phrase-management {
+                max-height: 300px;
+            }
+        }
+        
+        /* Small phones */
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .tab-content {
+                padding: 1rem;
+            }
+            
+            .word-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            input, select, button {
+                font-size: 0.9rem;
+            }
+            
+            .quote {
+                font-size: 0.9rem;
+                padding: 1.25rem;
+            }
+            
+            /* Limiter encore plus les notifications sur petits écrans */
+            .notification-container {
+                max-width: calc(100% - 10px);
+                right: 5px;
+                bottom: 5px;
+            }
+            
+            .notification:nth-child(n+3) {
+                display: none;
+            }
+            
+            /* Ajuster la taille des boutons flottants */
+            .floating-action-menu .menu-trigger {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .floating-action-menu .menu-item {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo">VOID</div>
+        </div>
+        <h1>Générateur Combinatoire de Texte</h1>
+        <p class="header-subtitle">Explorer l'infini des possibilités textuelles</p>
+        <p class="author">Développé par Choussi Cherif</p>
+    </header>
+    
+    <div class="quote-container">
+        <div class="quote">
+            "Si vous combinez toutes les lettres de l'alphabet dans toutes les configurations possibles, alors vous finirez par obtenir tous les textes imaginables. Si toutes les configurations possibles existent, alors il y a quelque part une réalité où tout s'est déroulé différemment."
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="target">
+                <i class="fas fa-search"></i> Recherche Ciblée
+            </button>
+            <button class="tab" data-tab="random">
+                <i class="fas fa-random"></i> Génération Aléatoire
+            </button>
+            <button class="tab" data-tab="database">
+                <i class="fas fa-database"></i> Base de Données
+            </button>
+            <button class="tab" data-tab="search">
+                <i class="fas fa-filter"></i> Recherche
+            </button>
+        </div>
+        
+        <div id="targetTab" class="tab-content active">
+            <div class="input-group">
+                <label for="targetText">
+                    <i class="fas fa-bullseye"></i> Phrase ou mot cible :
+                </label>
+                <input type="text" id="targetText" placeholder="Entrez le texte à rechercher">
+            </div>
+            
+            <div class="input-group">
+                <label for="alphabet">
+                    <i class="fas fa-font"></i> Alphabet à utiliser :
+                </label>
+                <input type="text" id="alphabet" value="abcdefghijklmnopqrstuvwxyz " placeholder="Caractères à combiner">
+            </div>
+
+            <div class="input-group">
+                <label for="maxLength">
+                    <i class="fas fa-text-width"></i> Longueur maximale :
+                </label>
+                <input type="number" id="maxLength" min="1" max="20" value="5">
+                <small style="opacity: 0.8; margin-top: 0.5rem; display: block; font-style: italic;">
+                    <i class="fas fa-info-circle"></i> La recherche peut être très longue pour des valeurs élevées
+                </small>
+            </div>
+            
+            <div class="button-group">
+                <button id="startTargetBtn">
+                    <i class="fas fa-play"></i> Lancer la recherche
+                </button>
+                <button id="stopTargetBtn" class="stop-btn" style="display:none;">
+                    <i class="fas fa-stop"></i> Arrêter
+                </button>
+            </div>
+            
+            <div class="progress-container" id="targetProgress">
+                <p><i class="fas fa-spinner fa-pulse"></i> Progression :</p>
+                <div class="progress-bar">
+                    <div class="progress" id="targetProgressBar"></div>
+                </div>
+                <p id="targetProgressText">0%</p>
+                <div id="currentCombination"></div>
+            </div>
+            
+            <div class="result-container" id="targetResult">
+                <h3>Résultat :</h3>
+                <div id="targetOutput"></div>
+            </div>
+        </div>
+        
+        <div id="randomTab" class="tab-content">
+            <div class="input-group">
+                <label for="randomLength">
+                    <i class="fas fa-text-width"></i> Longueur des combinaisons :
+                </label>
+                <input type="number" id="randomLength" min="1" max="10" value="5">
+            </div>
+            
+            <div class="input-group">
+                <label for="randomAlphabet">
+                    <i class="fas fa-font"></i> Alphabet à utiliser :
+                </label>
+                <input type="text" id="randomAlphabet" value="abcdefghijklmnopqrstuvwxyz " placeholder="Caractères à combiner">
+            </div>
+            
+            <div class="input-group">
+                <label for="generationSpeed">
+                    <i class="fas fa-tachometer-alt"></i> Vitesse de génération :
+                </label>
+                <select id="generationSpeed">
+                    <option value="fast">Rapide</option>
+                    <option value="medium" selected>Moyenne</option>
+                    <option value="slow">Lente</option>
+                </select>
+            </div>
+            
+            <div class="button-group">
+                <button id="startRandomBtn">
+                    <i class="fas fa-play"></i> Démarrer la génération aléatoire
+                </button>
+                <button id="stopRandomBtn" class="stop-btn" style="display:none;">
+                    <i class="fas fa-stop"></i> Arrêter
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCombinations">0</div>
+                    <div class="stat-label">Combinaisons testées</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="validWords">0</div>
+                    <div class="stat-label">Mots valides trouvés</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="validPhrases">0</div>
+                    <div class="stat-label">Phrases valides trouvées</div>
+                </div>
+            </div>
+            
+            <div class="result-container">
+                <h3>Combinaison actuelle :</h3>
+                <div id="randomOutput" class="fixed-height-output"></div>
+            </div>
+        </div>
+        
+        <div id="databaseTab" class="tab-content">
+            <div class="button-group">
+                <button id="exportDbBtn">
+                    <i class="fas fa-download"></i> Exporter la base de données
+                </button>
+                <button id="clearDbBtn" class="stop-btn">
+                    <i class="fas fa-trash"></i> Vider la base de données
+                </button>
+                <button id="managePhraseBtn">
+                    <i class="fas fa-edit"></i> Gérer les phrases
+                </button>
+            </div>
+            
+            <div class="result-container">
+                <h3>Mots trouvés : <span class="badge badge-primary" id="wordCount">0</span></h3>
+                <div id="wordDatabase" class="word-grid"></div>
+            </div>
+            
+            <div class="result-container">
+                <h3>Phrases trouvées : <span class="badge badge-primary" id="phraseCount">0</span></h3>
+                <div id="phraseDatabase"></div>
+            </div>
+        </div>
+        
+        <div id="searchTab" class="tab-content">
+            <div class="input-group">
+                <label for="searchQuery">
+                    <i class="fas fa-search"></i> Rechercher un mot ou une phrase :
+                </label>
+                <input type="text" id="searchQuery" placeholder="Entrez votre recherche">
+            </div>
+            
+            <button id="searchBtn">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+            
+            <div class="result-container">
+                <h3>Résultats de recherche :</h3>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour la gestion des phrases -->
+    <div class="modal-overlay" id="phraseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-edit"></i> Gestion des phrases
+                </h2>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="phrase-filter">
+                    <input type="text" id="phraseFilter" placeholder="Filtrer les phrases..." class="search-input">
+                </div>
+                <div id="editFormContainer" class="edit-form">
+                    <div class="input-group">
+                        <label for="editPhraseInput">Modifier la phrase :</label>
+                        <input type="text" id="editPhraseInput">
+                        <input type="hidden" id="editPhraseId">
+                    </div>
+                    <div class="button-group">
+                        <button id="saveEditBtn">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <button id="cancelEditBtn">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
+                </div>
+                <div class="phrase-management" id="phraseManagement">
+                    <!-- Les phrases seront chargées ici dynamiquement -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div>
+                    <span id="phraseStats">Affichage de 0 phrases sur 0</span>
+                </div>
+                <div>
+                    <button id="syncPhrasesBtn">
+                        <i class="fas fa-sync-alt"></i> Synchroniser avec le fichier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu d'actions flottant (visible sur mobile) -->
+    <div class="floating-action-menu" id="floatingMenu">
+        <div class="menu-trigger" id="menuTrigger">
+            <i class="fas fa-ellipsis-v"></i>
+        </div>
+        <div class="menu-items">
+            <a href="#" class="menu-item" id="toggleNotifications" title="Activer/désactiver les notifications">
+                <i class="fas fa-bell"></i>
+            </a>
+            <a href="#" class="menu-item" id="quickSettings" title="Paramètres rapides">
+                <i class="fas fa-cog"></i>
+            </a>
+            <a href="#" class="menu-item" id="syncData" title="Synchroniser les données">
+                <i class="fas fa-sync"></i>
+            </a>
+        </div>
+    </div>
+    
+    <button id="clearNotifications" class="clear-notifications">
+        <i class="fas fa-times-circle"></i> Effacer
+    </button>
+    <div id="notificationContainer" class="notification-container" data-hidden=""></div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">VOID</div>
+            <p>&copy; 2025 Générateur Combinatoire de Texte | Développé par Choussi Cherif</p>
+            <div class="footer-links">
+                <a href="#" class="tooltip">
+                    <i class="fas fa-info-circle"></i> À propos
+                    <span class="tooltip-text">Une application qui explore les possibilités infinies des combinaisons textuelles.</span>
+                </a>
+                <a href="#" class="tooltip">
+                    <i class="fas fa-envelope"></i> Contact
+                    <span class="tooltip-text">Contactez le développeur pour toute question ou suggestion.</span>
+                </a>
+                <a href="#" class="tooltip">
+                    <i class="fas fa-question-circle"></i> Aide
+                    <span class="tooltip-text">Découvrez comment utiliser efficacement cette application.</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+    // Cache pour le dictionnaire
+    let dictionaryCache = new Map();
+    let frenchDictionary = []; // Dictionnaire complet à charger
+
+    // Gestion des notifications - améliorée pour le responsive
+    let notifications = [];
+    const MAX_NOTIFICATIONS = 5; // Nombre maximum de notifications visibles à la fois
+    let notificationsActive = true; // État des notifications (actives ou non)
+
+    // Base de données locale
+    let database = {
+        words: [],
+        phrases: []
+    };
+
+    document.getElementById('clearNotifications').addEventListener('click', () => {
+        const notifs = document.querySelectorAll('.notification');
+        notifs.forEach(notif => removeNotification(notif));
+        notifications = [];
+    });
+
+    // Chemin du fichier de phrases JSON
+    const PHRASES_FILE = 'phrases_database.json';
+
+    // Chargement initial du dictionnaire complet
+    async function loadCompleteDictionary() {
+        try {
+            // Essayer de charger le dictionnaire complet
+            const response = await fetch('dictionnaire-francais.json');
+            if (!response.ok) {
+                throw new Error(`Erreur lors du chargement du dictionnaire: ${response.status}`);
+            }
+            const data = await response.json();
+            frenchDictionary = Array.isArray(data) ? data : (data.words || []);
+            console.log(`Dictionnaire chargé avec succès: ${frenchDictionary.length} mots`);
+            
+            // Initialiser le cache avec quelques mots courants pour accélérer le démarrage
+            initializeCommonWordsCache();
+            
+            return true;
+        } catch (error) {
+            console.warn(`Impossible de charger le dictionnaire externe: ${error.message}`);
+            console.log("Utilisation du dictionnaire de secours intégré");
+            frenchDictionary = fallbackDictionary;
+            return false;
+        }
+    }
+
+    // Initialisation du cache avec des mots courants
+    function initializeCommonWordsCache() {
+        // Mots très courants qui doivent être immédiatement disponibles dans le cache
+        const commonWords = [
+            "le", "la", "les", "un", "une", "des", "et", "est", "sont", "a", "ont",
+            "je", "tu", "il", "elle", "nous", "vous", "ils", "elles", 
+            "dans", "pour", "avec", "sur", "de", "ce", "cette",
+            "mais", "ou", "où", "car", "donc", "quand", "comment", "pourquoi",
+            "bon", "bien", "mal", "petit", "grand", "beau", "vrai", "faux", 
+            "homme", "femme", "enfant", "jour", "nuit", "temps", "vie"
+        ];
+        
+        for (const word of commonWords) {
+            dictionaryCache.set(word, true);
+        }
+    }
+
+    // Fonction pour vérifier si un mot existe dans le dictionnaire
+    async function checkWordExistence(word) {
+        // Si le mot est déjà dans le cache, retourner le résultat
+        if (dictionaryCache.has(word)) {
+            return dictionaryCache.get(word);
+        }
+        
+        // Pour les nouveaux mots, vérifier dans le dictionnaire complet
+        const exists = frenchDictionary.includes(word.toLowerCase());
+        
+        // Ajouter au cache
+        dictionaryCache.set(word, exists);
+        
+        return exists;
+    }
+
+    // Dictionnaire de secours intégré (en cas d'échec du chargement)
+    const fallbackDictionary = [
+        // Articles, pronoms, prépositions
+        "le", "la", "les", "un", "une", "des", "ce", "cette", "ces", "mon", "ma", "mes", 
+        "ton", "ta", "tes", "son", "sa", "ses", "notre", "nos", "votre", "vos", "leur", "leurs",
+        "je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles", 
+        "me", "te", "se", "lui", "en", "y",
+        "à", "de", "dans", "par", "pour", "avec", "sans", "chez", "sous", "sur", "entre",
+        "et", "ou", "mais", "donc", "car", "ni", "que", "qui", "quoi", "dont", "où",
+        
+        // Verbes courants (à l'infinitif et conjugués)
+        "être", "suis", "es", "est", "sommes", "êtes", "sont", "était", "étais", "étaient",
+        "avoir", "ai", "as", "a", "avons", "avez", "ont", "avait", "avais", "avaient",
+        "faire", "fais", "fait", "faisons", "faites", "font", "allons", "allez", "vont",
+        "aller", "vais", "vas", "va", "dire", "dis", "dit", "voir", "vois", "voit", 
+        "pouvoir", "peux", "peut", "peuvent", "vouloir", "veux", "veut", "veulent",
+        "savoir", "sais", "sait", "prendre", "donne", "mettre", "parler", "penser",
+        
+        // Adjectifs courants
+        "grand", "grande", "petit", "petite", "bon", "bonne", "beau", "belle", "nouveau", "nouvelle",
+        "vieux", "vieille", "jeune", "joli", "fort", "important", "intéressant", "difficile",
+        
+        // Noms courants
+        "homme", "femme", "enfant", "personne", "gens", "vie", "temps", "jour", "nuit", "année",
+        "monde", "pays", "ville", "rue", "maison", "pièce", "table", "chaise", "lit", "porte",
+        "eau", "feu", "air", "terre", "ciel", "ami", "famille", "père", "mère", "frère", "sœur",
+        "travail", "argent", "problème", "question", "réponse", "idée", "chose", "objet",
+        
+        // Adverbes courants
+        "bien", "mal", "très", "trop", "plus", "moins", "peu", "assez", "beaucoup", "tout", "rien",
+        "jamais", "toujours", "souvent", "parfois", "maintenant", "après", "avant", "ici", "là",
+        
+        // Nombres
+        "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", 
+        "vingt", "trente", "cent", "mille"
+    ];
+
+    // Chargement de la base de données depuis localStorage
+    function loadDatabase() {
+        try {
+            const savedData = localStorage.getItem('combinatoryDatabase');
+            if (savedData) {
+                database = JSON.parse(savedData);
+                updateDatabaseDisplay();
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement de la base de données:', error);
+            showNotification('Erreur lors du chargement de la base de données', 'error');
+        }
+    }
+
+    // Sauvegarde de la base de données dans localStorage
+    function saveDatabase() {
+        try {
+            localStorage.setItem('combinatoryDatabase', JSON.stringify(database));
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde de la base de données:', error);
+            showNotification('Erreur lors de la sauvegarde de la base de données', 'error');
+        }
+    }
+
+    // Mise à jour de l'affichage de la base de données
+    function updateDatabaseDisplay() {
+        const wordDb = document.getElementById('wordDatabase');
+        const phraseDb = document.getElementById('phraseDatabase');
+        const wordCount = document.getElementById('wordCount');
+        const phraseCount = document.getElementById('phraseCount');
+        
+        if (!wordDb || !phraseDb) return;
+        
+        wordDb.innerHTML = '';
+        database.words.slice(0, 100).forEach(word => {
+            const wordElement = document.createElement('div');
+            wordElement.className = 'word-item';
+            wordElement.textContent = word;
+            wordDb.appendChild(wordElement);
+        });
+        
+        phraseDb.innerHTML = '';
+        database.phrases.slice(0, 50).forEach(phrase => {
+            const phraseElement = document.createElement('div');
+            phraseElement.className = 'phrase-item';
+            phraseElement.textContent = phrase;
+            phraseDb.appendChild(phraseElement);
+        });
+        
+        // Mise à jour des badges de comptage 
+        if (wordCount) wordCount.textContent = database.words.length;
+        if (phraseCount) phraseCount.textContent = database.phrases.length;
+        
+        // Mise à jour des statistiques
+        const totalWords = document.getElementById('validWords');
+        const totalPhrases = document.getElementById('validPhrases');
+        
+        if (totalWords) totalWords.textContent = database.words.length;
+        if (totalPhrases) totalPhrases.textContent = database.phrases.length;
+    }
+
+    // Dans votre fichier JavaScript principal, remplacez loadPhrasesFromFile et savePhrasesToFile
+    async function loadPhrasesFromFile() {
+        try {
+            showNotification('Chargement des phrases...', 'info');
+            
+            // Appel API pour charger les phrases
+            const response = await fetch('/api/phrases');
+            if (!response.ok) {
+                throw new Error(`Erreur lors du chargement des phrases: ${response.status}`);
+            }
+            
+            const phrasesData = await response.json();
+            
+            // Fusionner les phrases avec celles de la base de données
+            if (Array.isArray(phrasesData.phrases)) {
+                const newPhrases = phrasesData.phrases.filter(phrase => 
+                    !database.phrases.includes(phrase)
+                );
+                
+                if (newPhrases.length > 0) {
+                    database.phrases = [...database.phrases, ...newPhrases];
+                    saveDatabase();
+                    updateDatabaseDisplay();
+                    showNotification(`${newPhrases.length} nouvelles phrases importées`, 'success');
+                } else {
+                    showNotification('Aucune nouvelle phrase à importer', 'info');
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Erreur lors du chargement des phrases:', error);
+            showNotification('Erreur lors du chargement des phrases', 'error');
+            return false;
+        }
+    }
+
+    async function savePhrasesToFile() {
+        try {
+            showNotification('Enregistrement des phrases...', 'info');
+            
+            // Préparer les données
+            const phrasesData = {
+                phrases: database.phrases,
+                lastUpdated: new Date().toISOString(),
+                totalCount: database.phrases.length
+            };
+            
+            // Appel API pour sauvegarder les phrases
+            const response = await fetch('/api/phrases', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(phrasesData)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Échec de l\'enregistrement');
+            }
+            
+            const result = await response.json();
+            showNotification('Phrases enregistrées avec succès', 'success');
+            return true;
+        } catch (error) {
+            console.error('Erreur lors de l\'enregistrement des phrases:', error);
+            showNotification('Erreur lors de l\'enregistrement des phrases', 'error');
+            return false;
+        }
+    }
+
+    // Sauvegarder les phrases dans le fichier JSON
+    async function savePhrasesToFile() {
+        try {
+            showNotification('Enregistrement des phrases...', 'info');
+            
+            // Préparer les données
+            const phrasesData = {
+                phrases: database.phrases,
+                lastUpdated: new Date().toISOString(),
+                totalCount: database.phrases.length
+            };
+            
+            // En production, ceci nécessite un point d'API sur le serveur
+            // Cette fonction simule la sauvegarde côté client
+            const saveSuccess = simulateSaveToServer(phrasesData);
+            
+            if (saveSuccess) {
+                showNotification('Phrases enregistrées avec succès', 'success');
+                return true;
+            } else {
+                throw new Error('Échec de l\'enregistrement');
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'enregistrement des phrases:', error);
+            showNotification('Erreur lors de l\'enregistrement des phrases', 'error');
+            return false;
+        }
+    }
+
+    // Simulation de sauvegarde sur le serveur (à remplacer par une véritable API)
+    function simulateSaveToServer(data) {
+        try {
+            // Enregistrer dans localStorage comme simulation
+            localStorage.setItem('phrases_backup', JSON.stringify(data));
+            console.log('Phrases sauvegardées (simulation):', data);
+            return true;
+        } catch (error) {
+            console.error('Erreur de simulation de sauvegarde:', error);
+            return false;
+        }
+    }
+
+    // Fonction pour ajouter un mot à la base de données
+    function addWordToDatabase(word) {
+        if (word && word.length >= 2 && !database.words.includes(word)) {
+            database.words.push(word);
+            database.words = [...new Set(database.words)]; // Éliminer les doublons
+            saveDatabase();
+            updateDatabaseDisplay();
+            return true;
+        }
+        return false;
+    }
+
+    // Variables globales pour le suivi des processus
+    let isTargetRunning = false;
+    let isRandomRunning = false;
+    let randomInterval = null;
+    let targetStartTime = 0;
+
+    // Modèle de Markov pour la génération de texte
+    let markovModel = {
+        transitions: {}, // Transitions de lettres
+        wordStarts: [],  // Débuts de mots courants
+        wordEnds: []     // Fins de mots courants
+    };
+
+    // Construction du modèle de Markov
+    function buildMarkovModel() {
+        markovModel.transitions = {};
+        markovModel.wordStarts = [];
+        markovModel.wordEnds = [];
+        
+        // Limiter le nombre de mots à analyser pour des raisons de performance
+        const wordsToProcess = frenchDictionary.slice(0, 10000);
+        
+        for (const word of wordsToProcess) {
+            if (word.length < 2) continue;
+            
+            // Enregistrer les débuts et fins de mots
+            markovModel.wordStarts.push(word.substring(0, 2));
+            markovModel.wordEnds.push(word.substring(word.length - 2));
+            
+            // Construire les transitions de lettres
+            for (let i = 0; i < word.length - 1; i++) {
+                const current = word[i];
+                const next = word[i + 1];
+                
+                if (!markovModel.transitions[current]) {
+                    markovModel.transitions[current] = {};
+                }
+                
+                if (!markovModel.transitions[current][next]) {
+                    markovModel.transitions[current][next] = 0;
+                }
+                
+                markovModel.transitions[current][next]++;
+            }
+        }
+        
+        // Éliminer les doublons dans les listes de démarrage/fin
+        markovModel.wordStarts = [...new Set(markovModel.wordStarts)];
+        markovModel.wordEnds = [...new Set(markovModel.wordEnds)];
+        
+        console.log("Modèle de Markov construit avec succès");
+    }
+
+    // Vérification si un mot existe dans le dictionnaire
+    async function isValidWord(word) {
+        if (!word || word.length < 2) return false;
+        
+        // Si le mot est très court (< 4 lettres), on peut être plus permissif
+        if (word.length < 4) {
+            // Pour ces mots courts, vérifier d'abord s'ils sont dans notre liste de mots courants
+            if (dictionaryCache.has(word.toLowerCase())) {
+                return dictionaryCache.get(word.toLowerCase());
+            }
+            
+            // Pour les mots de 2-3 lettres, vérifier dans le dictionnaire de secours aussi
+            const inFallback = fallbackDictionary.includes(word.toLowerCase());
+            if (inFallback) {
+                dictionaryCache.set(word.toLowerCase(), true);
+                return true;
+            }
+        }
+        
+        // Vérifier avec le dictionnaire principal
+        return await checkWordExistence(word.toLowerCase());
+    }
+
+    // Vérification si une phrase est cohérente (analyse améliorée)
+    async function isValidPhrase(phrase) {
+        if (!phrase || !phrase.includes(' ')) return false;
+        
+        // Découper la phrase en mots
+        const words = phrase.split(' ').filter(w => w.length > 0);
+        
+        // Une phrase doit avoir au moins 2 mots
+        if (words.length < 2) return false;
+        
+        // Plus exigeant : compter les mots valides
+        let validWordCount = 0;
+        
+        for (const word of words) {
+            if (await isValidWordSync(word)) {
+                validWordCount++;
+            }
+        }
+        
+        // Exiger qu'au moins 70% des mots soient valides pour une phrase courte
+        // Plus la phrase est longue, plus on peut être tolérant
+        const minValidRatio = words.length <= 3 ? 1.0 : (words.length <= 5 ? 0.8 : 0.7);
+        const validRatio = validWordCount / words.length;
+        
+        return validRatio >= minValidRatio;
+    }
+
+    // Version synchrone pour la compatibilité avec le code existant
+    function isValidWordSync(word) {
+        if (!word || word.length < 2) return false;
+        
+        // D'abord vérifier dans le cache
+        if (dictionaryCache.has(word)) {
+            return dictionaryCache.get(word);
+        }
+        
+        // Sinon vérifier dans le dictionnaire
+        const exists = frenchDictionary.includes(word.toLowerCase());
+        
+        // Mettre en cache pour les prochaines fois
+        dictionaryCache.set(word, exists);
+        
+        return exists;
+    }
+
+    function isValidPhraseSync(phrase) {
+        if (!phrase || !phrase.includes(' ')) return false;
+        
+        const words = phrase.split(' ').filter(w => w.length > 0);
+        if (words.length < 2) return false;
+        
+        let validWordCount = 0;
+        
+        for (const word of words) {
+            if (isValidWordSync(word)) {
+                validWordCount++;
+            }
+        }
+        
+        // Adapter le seuil en fonction de la longueur de la phrase
+        const minValidRatio = words.length <= 3 ? 1.0 : (words.length <= 5 ? 0.8 : 0.7);
+        return (validWordCount / words.length) >= minValidRatio;
+    }
+
+    // Génération de combinaisons aléatoires avec le modèle de Markov
+    function generateRandomCombination(length, alphabet) {
+        // Si on génère une phrase et que la longueur est suffisante, essayer d'utiliser des mots réels
+        if (alphabet.includes(' ') && length > 5) {
+            // Réduire de 60% à 40%
+            if (Math.random() < 0.4) {
+                return generatePhraseWithRealWords(length);
+            }
+        }
+        
+        // Augmenter la probabilité d'utiliser le modèle de Markov pour les mots
+        if (!alphabet.includes(' ') && Math.random() < 0.6 && markovModel.wordStarts.length > 0) {
+            return generateWordWithMarkov(length, alphabet);
+        }
+        
+        // Méthode standard améliorée
+        let result = '';
+        
+        // Distribution des voyelles et consonnes plus réaliste
+        const vowels = 'aeiouy';
+        const consonants = 'bcdfghjklmnpqrstvwxz';
+        let lastWasVowel = false;
+        
+        // S'assurer que le premier caractère est aléatoire
+        const randomIndex = Math.floor(Math.random() * alphabet.length);
+        result += alphabet[randomIndex];
+        
+        // Vérifier si le premier caractère est une voyelle
+        lastWasVowel = vowels.includes(result[0].toLowerCase());
+        
+        // Générer le reste des caractères
+        for (let i = 1; i < length; i++) {
+            // Si on a l'espace dans l'alphabet et qu'on est à plus de 3 caractères
+            // Donner une chance d'insérer un espace (pour former des mots)
+            if (alphabet.includes(' ') && i > 3 && result.charAt(result.length - 1) !== ' ' && i < length - 2) {
+                // Éviter les espaces en fin de chaîne
+                if (Math.random() < 0.2) {
+                    result += ' ';
+                    continue;
+                }
+            }
+            
+            // Alternance plus réaliste entre voyelles et consonnes
+            if (lastWasVowel) {
+                // Après une voyelle, une consonne est plus probable
+                if (Math.random() < 0.8 && alphabet.split('').some(char => consonants.includes(char.toLowerCase()))) {
+                    // Choisir une consonne présente dans l'alphabet
+                    const availableConsonants = alphabet.split('').filter(char => 
+                        consonants.includes(char.toLowerCase())
+                    );
+                    if (availableConsonants.length > 0) {
+                        const consonantIndex = Math.floor(Math.random() * availableConsonants.length);
+                        result += availableConsonants[consonantIndex];
+                        lastWasVowel = false;
+                        continue;
+                    }
+                }
+            } else {
+                // Après une consonne, une voyelle est plus probable
+                if (Math.random() < 0.9 && alphabet.split('').some(char => vowels.includes(char.toLowerCase()))) {
+                    // Choisir une voyelle présente dans l'alphabet
+                    const availableVowels = alphabet.split('').filter(char => 
+                        vowels.includes(char.toLowerCase())
+                    );
+                    if (availableVowels.length > 0) {
+                        const vowelIndex = Math.floor(Math.random() * availableVowels.length);
+                        result += availableVowels[vowelIndex];
+                        lastWasVowel = true;
+                        continue;
+                    }
+                }
+            }
+            
+            // Si on n'a pas suivi la règle d'alternance, choisir un caractère aléatoire
+            const randomIndex = Math.floor(Math.random() * alphabet.length);
+            result += alphabet[randomIndex];
+            
+            // Mettre à jour l'état
+            lastWasVowel = vowels.includes(result[result.length - 1].toLowerCase());
+        }
+        
+        // Éviter les espaces en début et fin de chaîne
+        result = result.trim();
+        
+        // Si la longueur est significativement réduite par le trim, compléter
+        if (result.length < length * 0.8) {
+            const additionalChars = generateRandomCombination(length - result.length, 
+                alphabet.replace(' ', '')); // Sans espace pour la fin
+            result = result + additionalChars;
+        }
+        
+        return result.substring(0, length);
+    }
+
+    // Générer un mot avec le modèle de Markov
+    function generateWordWithMarkov(length, alphabet) {
+        // S'assurer que le modèle est construit et que l'alphabet contient au moins une lettre
+        if (Object.keys(markovModel.transitions).length === 0 || !alphabet) {
+            return generateRandomCombination(length, alphabet);
+        }
+        
+        let word = '';
+        
+        // Commencer par un début de mot courant si possible
+        if (markovModel.wordStarts.length > 0) {
+            const startIndex = Math.floor(Math.random() * markovModel.wordStarts.length);
+            const start = markovModel.wordStarts[startIndex];
+            // Vérifier que les caractères de départ sont dans l'alphabet
+            if (start.split('').every(char => alphabet.includes(char))) {
+                word = start;
+            }
+        }
+        
+        // Si pas de début valide, prendre une lettre aléatoire
+        if (word.length === 0) {
+            const randomIndex = Math.floor(Math.random() * alphabet.length);
+            word = alphabet[randomIndex];
+        }
+        
+        // Générer le reste du mot en utilisant le modèle de Markov
+        while (word.length < length) {
+            const lastChar = word[word.length - 1];
+            
+            // Si cette lettre n'est pas dans le modèle ou pas dans l'alphabet
+            if (!markovModel.transitions[lastChar] || !alphabet.includes(lastChar)) {
+                // Choisir une lettre aléatoire dans l'alphabet
+                const randomIndex = Math.floor(Math.random() * alphabet.length);
+                word += alphabet[randomIndex];
+                continue;
+            }
+            
+            // Obtenir les possibilités pour la prochaine lettre
+            const possibleNextChars = Object.keys(markovModel.transitions[lastChar])
+                .filter(char => alphabet.includes(char));
+            
+            if (possibleNextChars.length === 0) {
+                // Si aucune lettre possible, choisir aléatoirement
+                const randomIndex = Math.floor(Math.random() * alphabet.length);
+                word += alphabet[randomIndex];
+                continue;
+            }
+            
+            // Choisir la prochaine lettre selon les probabilités du modèle
+            const weights = possibleNextChars.map(char => markovModel.transitions[lastChar][char]);
+            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            let randomValue = Math.random() * totalWeight;
+            
+            let nextChar = possibleNextChars[0]; // Valeur par défaut
+            for (let i = 0; i < possibleNextChars.length; i++) {
+                randomValue -= weights[i];
+                if (randomValue <= 0) {
+                    nextChar = possibleNextChars[i];
+                    break;
+                }
+            }
+            
+            word += nextChar;
+        }
+        
+        // Ajuster la longueur si nécessaire
+        return word.substring(0, length);
+    }
+
+    // Fonction pour générer des phrases avec des mots réels
+    function generatePhraseWithRealWords(length) {
+        // Utiliser des mots réels du dictionnaire français
+        // Sélectionner des mots aléatoires de différentes catégories
+        
+        // Catégories de mots (simplifiées pour la performance)
+        const articles = ["le", "la", "les", "un", "une", "des", "ce", "cette", "ces"];
+        const prepositions = ["à", "de", "dans", "par", "pour", "avec", "sans", "en", "sur"];
+        const conjonctions = ["et", "ou", "mais", "donc", "car", "si", "quand", "comme"];
+        
+        // Sélectionner des mots aléatoires du dictionnaire
+        const getRandomWord = (minLength = 2, maxLength = 8) => {
+            // Filtrer les mots par longueur
+            const eligibleWords = frenchDictionary.filter(word => 
+                word.length >= minLength && word.length <= maxLength
+            );
+            
+            if (eligibleWords.length === 0) {
+                // Secours - utiliser le dictionnaire de secours
+                return fallbackDictionary[Math.floor(Math.random() * fallbackDictionary.length)];
+            }
+            
+            // Choisir un mot aléatoire
+            return eligibleWords[Math.floor(Math.random() * eligibleWords.length)];
+        };
+        
+        // Construire une phrase grammaticalement plausible
+        let phrase = '';
+        let remainingLength = length;
+        
+        // Structure simple: Article + Nom + Verbe + Article + Nom
+        const structures = [
+            // [probabilité, [structure]]
+            [0.4, [articles, null, null, prepositions, articles, null]],
+            [0.3, [articles, null, null, conjonctions, articles, null]],
+            [0.3, [articles, null, prepositions, articles, null]]
+        ];
+        
+        // Choisir une structure aléatoire
+        const randomStructure = Math.random();
+        let structure;
+        
+        let probability = 0;
+        for (const [prob, struct] of structures) {
+            probability += prob;
+            if (randomStructure <= probability) {
+                structure = struct;
+                break;
+            }
+        }
+        
+        if (!structure) {
+            structure = structures[0][1]; // Utiliser la première structure par défaut
+        }
+        
+        // Remplir la structure
+        for (let i = 0; i < structure.length; i++) {
+            if (remainingLength <= 0) break;
+            
+            let word = '';
+            
+            if (structure[i] === null) {
+                // Position pour un mot aléatoire
+                const maxWordLength = Math.min(remainingLength, 8);
+                word = getRandomWord(2, maxWordLength);
+            } else {
+                // Position pour un mot de catégorie spécifique
+                const category = structure[i];
+                word = category[Math.floor(Math.random() * category.length)];
+            }
+            
+            // Ajouter un espace si ce n'est pas le premier mot
+            if (phrase.length > 0 && remainingLength > word.length + 1) {
+                phrase += ' ';
+                remainingLength--;
+            }
+            
+            // Ajouter le mot
+            phrase += word;
+            remainingLength -= word.length;
+        }
+        
+        // Si la phrase est trop courte, compléter avec un mot aléatoire
+        if (remainingLength > 2) {
+            phrase += ' ' + getRandomWord(2, remainingLength - 1);
+        }
+        
+        // Ajuster exactement à la longueur demandée
+        return phrase.substring(0, length);
+    }
+
+    // Estimation du nombre total de combinaisons possibles
+    function estimateTotalCombinations(alphabet, maxLength) {
+        let total = 0;
+        for (let i = 1; i <= maxLength; i++) {
+            total += Math.pow(alphabet.length, i);
+        }
+        return total;
+    }
+
+    // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
+    // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
+function startTargetSearch() {
+    const targetText = document.getElementById('targetText').value.trim();
+    const alphabet = document.getElementById('alphabet').value;
+    const maxLength = parseInt(document.getElementById('maxLength').value);
+    
+    if (!targetText) {
+        showNotification('Veuillez entrer un texte cible.', 'error');
+        return;
+    }
+    
+    document.getElementById('startTargetBtn').style.display = 'none';
+    document.getElementById('stopTargetBtn').style.display = 'inline-block';
+    document.getElementById('targetProgress').style.display = 'block';
+    document.getElementById('targetOutput').textContent = '';
+    
+    isTargetRunning = true;
+    targetStartTime = Date.now();
+    
+    // Variables pour l'algorithme génétique
+    const populationSize = 100;
+    const mutationRate = 0.05;
+    const elitismCount = 10;
+    let population = [];
+    let generation = 0;
+    let bestFitness = 0;
+    let bestCandidate = '';
+    let combinationsTested = 0;
+    const totalEstimatedGenerations = 1000; // Estimation pour la barre de progression
+    
+    // Initialisation et autres fonctions inchangées...
+    
+    // Fonction principale d'évolution modifiée
+    const evolve = () => {
+        if (!isTargetRunning) return;
+        
+        // Limiter le nombre d'itérations par frame pour rester réactif
+        const iterations = 5; // Ajuster selon les performances
+        
+        for (let i = 0; i < iterations; i++) {
+            if (!isTargetRunning) break;
+            
+            // Faire évoluer la population
+            population = evolvePopulation();
+            generation++;
+            combinationsTested += populationSize;
+            
+            // Trouver le meilleur de cette génération
+            const best = findBestIndividual();
+            
+            // Mettre à jour si c'est le meilleur jusqu'à présent
+            if (best.fitness > bestFitness) {
+                bestFitness = best.fitness;
+                bestCandidate = best.individual;
+            }
+            
+            // Vérifier si on a trouvé une correspondance exacte
+            if (bestCandidate === targetText) {
+                document.getElementById('targetOutput').innerHTML = `
+                    <div class="success-message">
+                        <h4>Trouvé après ${generation} générations!</h4>
+                        <p>Combinaisons testées: ${combinationsTested}</p>
+                        <p>Meilleure correspondance: "${bestCandidate}"</p>
+                        <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
+                    </div>
+                `;
+                stopTargetSearch();
+                return;
+            }
+            
+            // Si on a fait trop de générations, arrêter
+            if (generation > 2000) {
+                document.getElementById('targetOutput').innerHTML = `
+                    <div class="info-message">
+                        <h4>Recherche terminée - Meilleure correspondance:</h4>
+                        <p>"${bestCandidate}" (Score: ${(bestFitness * 100).toFixed(2)}%)</p>
+                        <p>Générations: ${generation} | Combinaisons testées: ${combinationsTested}</p>
+                        <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
+                    </div>
+                `;
+                stopTargetSearch();
+                return;
+            }
+        }
+        
+        // Mise à jour de l'interface après les itérations
+        document.getElementById('currentCombination').innerHTML = Array.from(bestCandidate).map((char, i) => 
+            `<span class="char">${char}</span>`
+        ).join('');
+        
+        // Mise à jour de la progression
+        const progress = Math.min(100, (generation / totalEstimatedGenerations) * 100);
+        document.getElementById('targetProgressBar').style.width = `${progress}%`;
+        document.getElementById('targetProgressText').innerHTML = `
+            <div class="progress-info">
+                <span>Génération: ${generation}</span>
+                <span>Meilleur score: ${(bestFitness * 100).toFixed(2)}%</span>
+                <span>Combinaisons testées: ${combinationsTested}</span>
+            </div>
+        `;
+        
+        // Utiliser requestAnimationFrame pour la prochaine itération
+        requestAnimationFrame(evolve);
+    };
+    
+    // Initialiser la population
+    initializePopulation();
+    
+    // Démarrer l'évolution avec requestAnimationFrame
+    requestAnimationFrame(evolve);
+}
+
+    // Fonction pour arrêter la recherche ciblée
+    function stopTargetSearch() {
+        isTargetRunning = false;
+        document.getElementById('startTargetBtn').style.display = 'inline-block';
+        document.getElementById('stopTargetBtn').style.display = 'none';
+    }
+
+    // Fonction pour démarrer la génération aléatoire
+    // Fonction pour démarrer la génération aléatoire
+function startRandomGeneration() {
+    const length = parseInt(document.getElementById('randomLength').value);
+    const alphabet = document.getElementById('randomAlphabet').value;
+    const speed = document.getElementById('generationSpeed').value;
+    
+    document.getElementById('startRandomBtn').style.display = 'none';
+    document.getElementById('stopRandomBtn').style.display = 'inline-block';
+    
+    isRandomRunning = true;
+    let combinationsTested = 0;
+    
+    // Intervalle plus court pour être plus réactif
+    const interval = speed === 'fast' ? 10 : (speed === 'medium' ? 50 : 100);
+    
+    // Utiliser requestAnimationFrame au lieu de setInterval
+    // qui s'adapte mieux au cycle de rendu du navigateur
+    function generateNext() {
+        if (!isRandomRunning) return;
+        
+        // Générer une seule combinaison par frame
+        const combination = generateRandomCombination(length, alphabet);
+        combinationsTested++;
+        
+        // Mise à jour de l'affichage
+        document.getElementById('randomOutput').innerHTML = Array.from(combination).map((char, i) => 
+            `<span class="char ${char === ' ' ? 'space' : ''}">${char === ' ' ? '␣' : char}</span>`
+        ).join('');
+        document.getElementById('totalCombinations').textContent = combinationsTested;
+        
+        // Vérification différée de la validité pour ne pas bloquer l'interface
+        setTimeout(async () => {
+            try {
+                let isValid = false;
+                
+                if (combination.includes(' ')) {
+                    // C'est potentiellement une phrase
+                    isValid = await isValidPhrase(combination);
+                    if (isValid) {
+                        if (addPhraseToDatabase(combination)) {
+                            // Notification visuelle
+                            document.getElementById('randomOutput').classList.add('found-animation');
+                            setTimeout(() => {
+                                document.getElementById('randomOutput').classList.remove('found-animation');
+                            }, 1000);
+                            
+                            // Notification utilisateur pour les phrases remarquables
+                            if (combination.split(' ').length >= 3) {
+                                showNotification(`Phrase trouvée: "${combination}"`, 'success');
+                            }
+                        }
+                    }
+                } else {
+                    // C'est potentiellement un mot
+                    console.log(`Vérifiant le mot: "${combination}"`);
+                    isValid = await isValidWord(combination);
+                    console.log(`Résultat validation: ${isValid}`);
+                    if (isValid) {
+                        if (addWordToDatabase(combination)) {
+                            // Notification visuelle
+                            document.getElementById('randomOutput').classList.add('found-animation');
+                            setTimeout(() => {
+                                document.getElementById('randomOutput').classList.remove('found-animation');
+                            }, 1000);
+                            showNotification(`Mot trouvé: "${combination}"`, 'success');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de la vérification:', error);
+            }
+        }, 0);
+        
+        // Planifier la prochaine génération avec requestAnimationFrame
+        // puis ajouter un délai selon la vitesse choisie
+        setTimeout(() => {
+            if (isRandomRunning) {
+                requestAnimationFrame(generateNext);
+            }
+        }, interval);
+    }
+    
+    // Démarrer la génération
+    requestAnimationFrame(generateNext);
+}
+
+    // Fonction pour arrêter la génération aléatoire
+    function stopRandomGeneration() {
+        isRandomRunning = false;
+        clearInterval(randomInterval);
+        document.getElementById('startRandomBtn').style.display = 'inline-block';
+        document.getElementById('stopRandomBtn').style.display = 'none';
+    }
+
+    // Fonction de recherche dans la base de données
+    function searchDatabase() {
+        const query = document.getElementById('searchQuery').value.trim().toLowerCase();
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (!query) {
+            resultsContainer.innerHTML = '<p>Veuillez entrer un terme de recherche.</p>';
+            return;
+        }
+        
+        const matchingWords = database.words.filter(word => word.toLowerCase().includes(query));
+        const matchingPhrases = database.phrases.filter(phrase => phrase.toLowerCase().includes(query));
+        
+        if (matchingWords.length === 0 && matchingPhrases.length === 0) {
+            resultsContainer.innerHTML = '<p>Aucun résultat trouvé.</p>';
+            return;
+        }
+        
+        let html = '';
+        
+        if (matchingWords.length > 0) {
+            html += '<h4>Mots correspondants :</h4><div class="word-grid">';
+            matchingWords.forEach(word => {
+                html += `<div class="word-item">${word}</div>`;
+            });
+            html += '</div>';
+        }
+        
+        if (matchingPhrases.length > 0) {
+            html += '<h4>Phrases correspondantes :</h4>';
+            matchingPhrases.forEach(phrase => {
+                html += `<div class="phrase-item">${phrase}</div>`;
+            });
+        }
+        
+        resultsContainer.innerHTML = html;
+    }
+
+    // Exportation de la base de données
+    function exportDatabase() {
+        try {
+            const dataStr = JSON.stringify(database, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'combinatory_database.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Base de données exportée avec succès', 'success');
+        } catch (error) {
+            console.error('Erreur lors de l\'exportation de la base de données:', error);
+            showNotification('Erreur lors de l\'exportation de la base de données', 'error');
+        }
+    }
+
+    // Effacement de la base de données
+    function clearDatabase() {
+        if (confirm('Êtes-vous sûr de vouloir vider la base de données ? Cette action est irréversible.')) {
+            database = { words: [], phrases: [] };
+            saveDatabase();
+            updateDatabaseDisplay();
+            showNotification('Base de données vidée avec succès', 'success');
+        }
+    }
+
+    // Fonction pour ajouter une phrase à la base de données avec vérification des redondances
+    async function addPhraseToDatabase(phrase) {
+        if (!phrase || !phrase.includes(' ') || phrase.length < 3) return false;
+        
+        // Normaliser la phrase (minuscules, espaces simples)
+        const normalizedPhrase = phrase.toLowerCase().trim().replace(/\s+/g, ' ');
+        
+        // Vérifier si une phrase similaire existe déjà
+        const similarExists = database.phrases.some(existingPhrase => {
+            const normalizedExisting = existingPhrase.toLowerCase().trim().replace(/\s+/g, ' ');
+            
+            // Vérifier si les phrases sont identiques ou très similaires
+            if (normalizedExisting === normalizedPhrase) return true;
+            
+            // Vérifier si l'une est contenue dans l'autre
+            if (normalizedExisting.includes(normalizedPhrase) || 
+                normalizedPhrase.includes(normalizedExisting)) {
+                
+                // Si la différence de taille est minime (moins de 20% de différence), considérer comme similaire
+                const lengthDiff = Math.abs(normalizedExisting.length - normalizedPhrase.length);
+                const maxLength = Math.max(normalizedExisting.length, normalizedPhrase.length);
+                if (lengthDiff / maxLength < 0.2) return true;
+            }
+            
+            return false;
+        });
+        
+        if (similarExists) {
+            // Phrase similaire déjà existante
+            console.log('Phrase similaire déjà existante:', phrase);
+            return false;
+        }
+        
+        // Ajouter la phrase et sauvegarder
+        database.phrases.push(phrase);
+        saveDatabase();
+        updateDatabaseDisplay();
+        
+        // Synchroniser avec le fichier JSON (périodiquement pour éviter trop d'opérations)
+        if (database.phrases.length % 5 === 0) {
+            savePhrasesToFile();
+        }
+        
+        return true;
+    }
+
+    // Fonction pour afficher des notifications avec gestion améliorée
+    function showNotification(message, type = 'info') {
+        // Ignorer les notifications de faible importance si trop récentes
+        const currentTime = Date.now();
+        
+        // Limiter les notifications de succès/info trop fréquentes (ignorer si < 2 secondes)
+        if (type === 'success' || type === 'info') {
+            const recentSimilarNotif = notifications.find(n => 
+                n.type === type && 
+                currentTime - n.timestamp < 2000 &&
+                n.message.includes(message.substring(0, 10))
+            );
+            
+            if (recentSimilarNotif) return; // Ignorer les notifications similaires trop récentes
+        }
+        
+        // Limiter le nombre total de notifications
+        if (notifications.length >= MAX_NOTIFICATIONS) {
+            // Supprimer la notification la plus ancienne
+            const oldestNotif = document.getElementById(notifications[0].id);
+            if (oldestNotif) removeNotification(oldestNotif);
+        }
+        
+        // Vérifier si les notifications sont actives
+        if (!notificationsActive) return;
+        
+        const notificationContainer = document.getElementById('notificationContainer') || createNotificationContainer();
+        
+        // Générer un ID unique pour cette notification
+        const notificationId = 'notification_' + Date.now();
+        
+        // Créer la notification
+        const notification = document.createElement('div');
+        notification.id = notificationId;
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="${type === 'error' ? 'fas fa-exclamation-circle' : 
+                        type === 'success' ? 'fas fa-check-circle' : 
+                        type === 'warning' ? 'fas fa-exclamation-triangle' : 
+                        'fas fa-info-circle'}"></i>
+            </div>
+            <div class="notification-content">
+                <p>${message}</p>
+            </div>
+            <button class="notification-close">&times;</button>
+        `;
+        
+        // Ajouter la notification au conteneur
+        notificationContainer.prepend(notification);
+        
+        // Mettre à jour le suivi des notifications
+        notifications.push({
+            id: notificationId,
+            type: type,
+            message: message,
+            timestamp: Date.now()
+        });
+        
+        // Limiter le nombre de notifications visibles
+        manageNotificationLimit();
+        
+        // Animation d'entrée
+        setTimeout(() => {
+            notification.classList.add('notification-show');
+        }, 10);
+        
+        // Auto-suppression après un délai (plus court pour les notifications de succès)
+        const timeout = setTimeout(() => {
+            removeNotification(notification);
+        }, type === 'success' ? 2500 : 4000);
+        
+        // Bouton de fermeture
+        const closeButton = notification.querySelector('.notification-close');
+        closeButton.addEventListener('click', () => {
+            clearTimeout(timeout);
+            removeNotification(notification);
+        });
+    }
+
+    // Gérer la limite de notifications visibles
+    function manageNotificationLimit() {
+        const notificationContainer = document.getElementById('notificationContainer');
+        if (!notificationContainer) return;
+        
+        // Obtenir toutes les notifications visibles
+        const visibleNotifications = notificationContainer.querySelectorAll('.notification');
+        
+        // Vérifier si on dépasse la limite
+        if (visibleNotifications.length > MAX_NOTIFICATIONS) {
+            // Nombre de notifications à masquer
+            const hiddenCount = visibleNotifications.length - MAX_NOTIFICATIONS;
+            
+            // Mettre à jour l'attribut data-hidden
+            notificationContainer.setAttribute('data-hidden', 
+                hiddenCount > 0 ? `+${hiddenCount} notifications` : '');
+            
+            // Masquer les plus anciennes notifications si sur mobile
+            if (window.innerWidth <= 768) {
+                Array.from(visibleNotifications)
+                    .slice(MAX_NOTIFICATIONS)
+                    .forEach(notif => {
+                        notif.style.display = 'none';
+                    });
+            }
+        } else {
+            notificationContainer.setAttribute('data-hidden', '');
+        }
+    }
+
+    function createNotificationContainer() {
+        const container = document.createElement('div');
+        container.id = 'notificationContainer';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function removeNotification(notification) {
+        notification.classList.remove('notification-show');
+        notification.classList.add('notification-hide');
+        
+        // Supprimer de la liste des notifications
+        const index = notifications.findIndex(n => n.id === notification.id);
+        if (index !== -1) {
+            notifications.splice(index, 1);
+        }
+        
+        setTimeout(() => {
+            notification.remove();
+            // Mettre à jour la gestion des limites après suppression
+            manageNotificationLimit();
+        }, 300);
+    }
+
+    // Initialisation de l'application
+    async function initializeApp() {
+        console.log("Initialisation de l'application...");
+        
+        // Charger le dictionnaire complet
+        showNotification("Chargement du dictionnaire en cours...", "info");
+        
+        try {
+            const dictionaryLoaded = await loadCompleteDictionary();
+            if (dictionaryLoaded) {
+                showNotification(`Dictionnaire chargé avec succès (${frenchDictionary.length} mots)`, "success");
+            } else {
+                showNotification("Utilisation du dictionnaire de secours intégré", "info");
+            }
+            
+            // Charger la base de données
+            loadDatabase();
+            
+            // Charger les phrases depuis le fichier JSON
+            await loadPhrasesFromFile();
+            
+            // Initialiser la gestion des phrases
+            initPhraseManagement();
+            
+            // Initialiser le menu flottant
+            initFloatingMenu();
+            
+        } catch (error) {
+            console.error("Erreur lors de l'initialisation:", error);
+            showNotification("Erreur lors de l'initialisation de l'application", "error");
+        }
+    }
+
+    // Initialisation du gestionnaire de phrases
+    function initPhraseManagement() {
+        const managePhraseBtn = document.getElementById('managePhraseBtn');
+        const phraseModal = document.getElementById('phraseModal');
+        const closeModal = document.getElementById('closeModal');
+        const phraseManagement = document.getElementById('phraseManagement');
+        const phraseFilter = document.getElementById('phraseFilter');
+        const syncPhrasesBtn = document.getElementById('syncPhrasesBtn');
+        const editFormContainer = document.getElementById('editFormContainer');
+        const editPhraseInput = document.getElementById('editPhraseInput');
+        const editPhraseId = document.getElementById('editPhraseId');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        
+        if (!managePhraseBtn) return;
+        
+        // Ouvrir le modal
+        managePhraseBtn.addEventListener('click', () => {
+            loadPhraseManagement();
+            phraseModal.classList.add('active');
+        });
+        
+        // Fermer le modal
+        closeModal.addEventListener('click', () => {
+            phraseModal.classList.remove('active');
+        });
+        
+        // Clic en dehors du modal pour fermer
+        phraseModal.addEventListener('click', (e) => {
+            if (e.target === phraseModal) {
+                phraseModal.classList.remove('active');
+            }
+        });
+        
+        // Filtre des phrases
+        phraseFilter.addEventListener('input', () => {
+            const filterValue = phraseFilter.value.toLowerCase();
+            loadPhraseManagement(filterValue);
+        });
+        
+        // Synchronisation avec le fichier
+        syncPhrasesBtn.addEventListener('click', async () => {
+            await savePhrasesToFile();
+            loadPhraseManagement();
+        });
+        
+        // Annuler l'édition
+        cancelEditBtn.addEventListener('click', () => {
+            editFormContainer.classList.remove('active');
+        });
+        
+        // Sauvegarder l'édition
+        saveEditBtn.addEventListener('click', () => {
+            const phraseId = parseInt(editPhraseId.value);
+            const newText = editPhraseInput.value.trim();
+            
+            if (newText && phraseId >= 0 && phraseId < database.phrases.length) {
+                database.phrases[phraseId] = newText;
+                saveDatabase();
+                loadPhraseManagement();
+                editFormContainer.classList.remove('active');
+                showNotification('Phrase modifiée avec succès', 'success');
+            } else {
+                showNotification('Erreur lors de la modification', 'error');
+            }
+        });
+    }
+
+    // Charger le contenu du gestionnaire de phrases
+    function loadPhraseManagement(filter = '') {
+        const phraseManagement = document.getElementById('phraseManagement');
+        const phraseStats = document.getElementById('phraseStats');
+        
+        if (!phraseManagement) return;
+        
+        phraseManagement.innerHTML = '';
+        
+        // Filtrer les phrases si nécessaire
+        const filteredPhrases = filter 
+            ? database.phrases.filter(phrase => phrase.toLowerCase().includes(filter))
+            : database.phrases;
+        
+        // Mettre à jour les statistiques
+        phraseStats.textContent = `Affichage de ${filteredPhrases.length} phrases sur ${database.phrases.length}`;
+        
+        // Afficher les phrases
+        filteredPhrases.forEach((phrase, index) => {
+            const originalIndex = database.phrases.indexOf(phrase);
+            
+            const phraseItem = document.createElement('div');
+            phraseItem.className = 'phrase-item-manage';
+            phraseItem.innerHTML = `
+                <div class="phrase-text">${phrase}</div>
+                <div class="phrase-actions">
+                    <button class="action-btn edit-btn" data-index="${originalIndex}" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-index="${originalIndex}" title="Supprimer">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            
+            phraseManagement.appendChild(phraseItem);
+        });
+        
+        // Ajouter des événements aux boutons
+        attachPhraseManagementEvents();
+    }
+
+    // Attacher les événements aux boutons de gestion des phrases
+    function attachPhraseManagementEvents() {
+        const editButtons = document.querySelectorAll('.edit-btn');
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const editFormContainer = document.getElementById('editFormContainer');
+        const editPhraseInput = document.getElementById('editPhraseInput');
+        const editPhraseId = document.getElementById('editPhraseId');
+        
+        // Événements pour les boutons d'édition
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const index = parseInt(button.getAttribute('data-index'));
+                if (index >= 0 && index < database.phrases.length) {
+                    editPhraseInput.value = database.phrases[index];
+                    editPhraseId.value = index;
+                    editFormContainer.classList.add('active');
+                }
+            });
+        });
+        
+        // Événements pour les boutons de suppression
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const index = parseInt(button.getAttribute('data-index'));
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette phrase ?')) {
+                    if (index >= 0 && index < database.phrases.length) {
+                        database.phrases.splice(index, 1);
+                        saveDatabase();
+                        loadPhraseManagement();
+                        showNotification('Phrase supprimée', 'success');
+                    }
+                }
+            });
+        });
+    }
+
+    // Initialisation du menu flottant
+    function initFloatingMenu() {
+        const menuTrigger = document.getElementById('menuTrigger');
+        const floatingMenu = document.getElementById('floatingMenu');
+        const toggleNotifications = document.getElementById('toggleNotifications');
+        
+        if (!menuTrigger) return;
+        
+        // Ouvrir/fermer le menu
+        menuTrigger.addEventListener('click', () => {
+            floatingMenu.classList.toggle('active');
+        });
+        
+        // Clic en dehors pour fermer
+        document.addEventListener('click', (e) => {
+            if (!floatingMenu.contains(e.target)) {
+                floatingMenu.classList.remove('active');
+            }
+        });
+        
+        // Activer/désactiver les notifications
+        toggleNotifications.addEventListener('click', (e) => {
+            e.preventDefault();
+            notificationsActive = !notificationsActive;
+            showNotification(
+                notificationsActive ? 'Notifications activées' : 'Notifications désactivées', 
+                notificationsActive ? 'success' : 'info'
+            );
+            
+            // Mettre à jour l'icône
+            toggleNotifications.querySelector('i').className = 
+                notificationsActive ? 'fas fa-bell' : 'fas fa-bell-slash';
+        });
+    }
+
+    // Gestion des événements
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialiser l'application
+        initializeApp();
+        
+        // Gestion des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+            });
+        });
+        
+        // Boutons de l'onglet "Recherche Ciblée"
+        document.getElementById('startTargetBtn').addEventListener('click', startTargetSearch);
+        document.getElementById('stopTargetBtn').addEventListener('click', stopTargetSearch);
+        
+        // Boutons de l'onglet "Génération Aléatoire"
+        document.getElementById('startRandomBtn').addEventListener('click', startRandomGeneration);
+        document.getElementById('stopRandomBtn').addEventListener('click', stopRandomGeneration);
+        
+        // Boutons de l'onglet "Base de Données"
+        document.getElementById('exportDbBtn').addEventListener('click', exportDatabase);
+        document.getElementById('clearDbBtn').addEventListener('click', clearDatabase);
+        
+        // Bouton de l'onglet "Recherche"
+        document.getElementById('searchBtn').addEventListener('click', searchDatabase);
+        document.getElementById('searchQuery').addEventListener('keyup', e => {
+            if (e.key === 'Enter') searchDatabase();
+        });
+        
+        // Adaptation au mode mobile
+        window.addEventListener('resize', () => {
+            manageNotificationLimit();
+        });
+    });
+</script>
+<div class="processing-indicator" id="processingIndicator">
+    <div class="processing-spinner"></div>
+    <div class="processing-text">Traitement en cours...</div>
+</div>
+</body>
+
+</html>
