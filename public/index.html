@@ -2315,65 +2315,175 @@ function startTargetSearch() {
     let combinationsTested = 0;
     const totalEstimatedGenerations = 1000; // Estimation pour la barre de progression
     
-    // Initialisation et autres fonctions inchangées...
-    
-    // Fonction principale d'évolution modifiée
-    const evolve = () => {
-        if (!isTargetRunning) return;
+    // Fonction pour calculer la fitness (similitude) entre une combinaison et le texte cible
+    function calculateFitness(combination) {
+        let score = 0;
+        const targetLength = targetText.length;
+        const combLength = combination.length;
         
-        // Limiter le nombre d'itérations par frame pour rester réactif
-        const iterations = 5; // Ajuster selon les performances
+        // Pénalité pour une longueur différente
+        let lengthPenalty = Math.abs(targetLength - combLength) * 0.5;
         
-        for (let i = 0; i < iterations; i++) {
-            if (!isTargetRunning) break;
-            
-            // Faire évoluer la population
-            population = evolvePopulation();
-            generation++;
-            combinationsTested += populationSize;
-            
-            // Trouver le meilleur de cette génération
-            const best = findBestIndividual();
-            
-            // Mettre à jour si c'est le meilleur jusqu'à présent
-            if (best.fitness > bestFitness) {
-                bestFitness = best.fitness;
-                bestCandidate = best.individual;
-            }
-            
-            // Vérifier si on a trouvé une correspondance exacte
-            if (bestCandidate === targetText) {
-                document.getElementById('targetOutput').innerHTML = `
-                    <div class="success-message">
-                        <h4>Trouvé après ${generation} générations!</h4>
-                        <p>Combinaisons testées: ${combinationsTested}</p>
-                        <p>Meilleure correspondance: "${bestCandidate}"</p>
-                        <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
-                    </div>
-                `;
-                stopTargetSearch();
-                return;
-            }
-            
-            // Si on a fait trop de générations, arrêter
-            if (generation > 2000) {
-                document.getElementById('targetOutput').innerHTML = `
-                    <div class="info-message">
-                        <h4>Recherche terminée - Meilleure correspondance:</h4>
-                        <p>"${bestCandidate}" (Score: ${(bestFitness * 100).toFixed(2)}%)</p>
-                        <p>Générations: ${generation} | Combinaisons testées: ${combinationsTested}</p>
-                        <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
-                    </div>
-                `;
-                stopTargetSearch();
-                return;
+        // Comparer les caractères qui se chevauchent
+        const overlapLength = Math.min(targetLength, combLength);
+        for (let i = 0; i < overlapLength; i++) {
+            if (combination[i] === targetText[i]) {
+                score += 1;
             }
         }
         
-        // Mise à jour de l'interface après les itérations
-        document.getElementById('currentCombination').innerHTML = Array.from(bestCandidate).map((char, i) => 
-            `<span class="char">${char}</span>`
-        ).join('');
+        // Normaliser le score entre 0 et 1
+        return (score / targetLength) - (lengthPenalty / targetLength);
+    }
+    
+    // Initialisation de la population - Déplacée ici pour être définie avant d'être utilisée
+    function initializePopulation() {
+        population = [];
+        for (let i = 0; i < populationSize; i++) {
+            const length = Math.min(targetText.length, Math.max(1, Math.floor(Math.random() * targetText.length) + 1));
+            const individual = generateRandomCombination(length, alphabet);
+            population.push(individual);
+        }
+    }
+    
+    // Sélection par tournoi
+    function tournamentSelection() {
+        const tournamentSize = 3;
+        let bestIndividual = null;
+        let bestFitness = -1;
+        
+        for (let i = 0; i < tournamentSize; i++) {
+            const randomIndex = Math.floor(Math.random() * population.length);
+            const individual = population[randomIndex];
+            const fitness = calculateFitness(individual);
+            
+            if (fitness > bestFitness) {
+                bestFitness = fitness;
+                bestIndividual = individual;
+            }
+        }
+        
+        return bestIndividual;
+    }
+    
+    // Croisement (crossover)
+    function crossover(parent1, parent2) {
+        // Point de croisement aléatoire
+        const crossoverPoint = Math.floor(Math.random() * Math.min(parent1.length, parent2.length));
+        
+        // Créer les enfants en échangeant des parties des parents
+        let child = parent1.substring(0, crossoverPoint) + parent2.substring(crossoverPoint);
+        
+        // Ajuster la longueur si nécessaire
+        if (child.length > targetText.length) {
+            child = child.substring(0, targetText.length);
+        }
+        
+        return child;
+    }
+    
+    // Mutation
+    function mutate(individual) {
+        let mutated = '';
+        
+        for (let i = 0; i < individual.length; i++) {
+            if (Math.random() < mutationRate) {
+                // Remplacer le caractère par un autre de l'alphabet
+                const randomIndex = Math.floor(Math.random() * alphabet.length);
+                mutated += alphabet[randomIndex];
+            } else {
+                mutated += individual[i];
+            }
+        }
+        
+        // Parfois ajouter ou supprimer un caractère
+        if (Math.random() < mutationRate && individual.length < targetText.length) {
+            const randomIndex = Math.floor(Math.random() * alphabet.length);
+            mutated += alphabet[randomIndex];
+        } else if (Math.random() < mutationRate && individual.length > 1) {
+            mutated = mutated.substring(0, mutated.length - 1);
+        }
+        
+        return mutated;
+    }
+    
+    // Évolution de la population
+    function evolvePopulation() {
+        // Trier la population par fitness
+        const sortedPopulation = [...population].sort((a, b) => 
+            calculateFitness(b) - calculateFitness(a)
+        );
+        
+        // Conserver l'élite
+        const newPopulation = sortedPopulation.slice(0, elitismCount);
+        
+        // Créer de nouveaux individus par sélection, croisement et mutation
+        while (newPopulation.length < populationSize) {
+            const parent1 = tournamentSelection();
+            const parent2 = tournamentSelection();
+            let child = crossover(parent1, parent2);
+            child = mutate(child);
+            newPopulation.push(child);
+        }
+        
+        return newPopulation;
+    }
+    
+    // Trouver le meilleur individu
+    function findBestIndividual() {
+        let best = population[0];
+        let bestScore = calculateFitness(best);
+        
+        for (let i = 1; i < population.length; i++) {
+            const score = calculateFitness(population[i]);
+            if (score > bestScore) {
+                best = population[i];
+                bestScore = score;
+            }
+        }
+        
+        return { individual: best, fitness: bestScore };
+    }
+    
+    // Initialiser la population - Appel maintenant que toutes les fonctions sont définies
+    initializePopulation();
+    
+    // Fonction principale d'évolution
+    const evolve = () => {
+        if (!isTargetRunning) return;
+        
+        // Faire évoluer la population
+        population = evolvePopulation();
+        generation++;
+        combinationsTested += populationSize;
+        
+        // Trouver le meilleur de cette génération
+        const best = findBestIndividual();
+        
+        // Mettre à jour si c'est le meilleur jusqu'à présent
+        if (best.fitness > bestFitness) {
+            bestFitness = best.fitness;
+            bestCandidate = best.individual;
+            
+            // Mise à jour de l'affichage
+            document.getElementById('currentCombination').innerHTML = Array.from(bestCandidate).map((char, i) => 
+                `<span class="char">${char}</span>`
+            ).join('');
+        }
+        
+        // Vérifier si on a trouvé une correspondance exacte
+        if (bestCandidate === targetText) {
+            document.getElementById('targetOutput').innerHTML = `
+                <div class="success-message">
+                    <h4>Trouvé après ${generation} générations!</h4>
+                    <p>Combinaisons testées: ${combinationsTested}</p>
+                    <p>Meilleure correspondance: "${bestCandidate}"</p>
+                    <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
+                </div>
+            `;
+            stopTargetSearch();
+            return;
+        }
         
         // Mise à jour de la progression
         const progress = Math.min(100, (generation / totalEstimatedGenerations) * 100);
@@ -2386,15 +2496,26 @@ function startTargetSearch() {
             </div>
         `;
         
-        // Utiliser requestAnimationFrame pour la prochaine itération
-        requestAnimationFrame(evolve);
+        // Arrêter après un certain nombre de générations sans amélioration
+        if (generation > 2000) {
+            document.getElementById('targetOutput').innerHTML = `
+                <div class="info-message">
+                    <h4>Recherche terminée - Meilleure correspondance:</h4>
+                    <p>"${bestCandidate}" (Score: ${(bestFitness * 100).toFixed(2)}%)</p>
+                    <p>Générations: ${generation} | Combinaisons testées: ${combinationsTested}</p>
+                    <p>Temps écoulé: ${((Date.now() - targetStartTime) / 1000).toFixed(2)} secondes</p>
+                </div>
+            `;
+            stopTargetSearch();
+            return;
+        }
+        
+        // Continuer l'évolution
+        setTimeout(evolve, 10);
     };
     
-    // Initialiser la population
-    initializePopulation();
-    
-    // Démarrer l'évolution avec requestAnimationFrame
-    requestAnimationFrame(evolve);
+    // Démarrer l'évolution
+    evolve();
 }
 
     // Fonction pour arrêter la recherche ciblée
