@@ -2284,12 +2284,9 @@
         return total;
     }
 
-    // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
-    // Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
-// Fonction pour démarrer la recherche ciblée avec un algorithme amélioré
-function startTargetSearch() {
-    const targetText = document.getElementById('targetText').value.trim();
-    const alphabet = document.getElementById('alphabet').value;
+// Récupérer les valeurs des entrées et les convertir en minuscules
+    const targetText = document.getElementById('targetText').value.trim().toLowerCase();
+    const alphabet = document.getElementById('alphabet').value.toLowerCase();
     const maxLength = parseInt(document.getElementById('maxLength').value);
     
     if (!targetText) {
